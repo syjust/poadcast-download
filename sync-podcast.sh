@@ -20,10 +20,29 @@ export URLS_FILE="$OUTPUT_DIR/$URLS_FILE_NAME"
 export FORCE_YES=0
 export DEBUG=0
 
-source $HOME/.bash/lib/usage.inc.sh
 #########################
 #   F U N C T I O N S   #
 #########################
+
+# {{{ function print_usage_options
+#
+print_usage_options() {
+    local file="$1"
+
+    [[ -z "$file" ]] \
+        && echo "WARN:print_usage_options, no file given" \
+        && return 1
+    [[ ! -e $file ]] \
+        && echo "WARN:print_usage_options, '${file}' file not found" \
+        && return 2
+
+    sed -n '/^[[:blank:]]*case/,/^[[:blank:]]*esac/p' ${file} \
+        | sed 's/^[[:blank:]]*//g;s/).*#/) #/;' \
+        | awk -F# '$1 ~ /)/ {printf "\t%-25s:%s\n", $1, $2}' \
+        | grep -vE "^[[:blank:]]*\*\)|;;"
+}
+export -f print_usage_options
+# }}}
 
 # {{{ function quit
 #
@@ -81,7 +100,12 @@ export -f xpather
 # {{{ function usage
 #
 usage() {
+    echo "USAGE : ./sync-podcast.sh [OPTIONS]"
+    echo
+    echo "WHERE OPTIONS are :"
+    echo
     print_usage_options $0
+    echo
 }
 export -f usage
 # }}}
