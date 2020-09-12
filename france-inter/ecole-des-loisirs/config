@@ -1,0 +1,2 @@
+RSS_URL="https://rss.acast.com/ecole-des-loisirs"
+ITEM_TITLE_PATH="acast:episodeUrl/text()"
