@@ -222,7 +222,7 @@ if [ ! -e $URLS_FILE ] ; then
         title="` \
             xpather "//item[./guid/text()='$guid']/$ITEM_TITLE_PATH" \
             | tr [[:upper:]] [[:lower:]] \
-            | sed 's/[" ?]/_/g;s/^_\{1,\}//g;s/_\{2,\}/_/g;s/[!?:,'"'"']//g;s/ $//;s/ /_/g' \
+            | sed 's/[" ?]/_/g;s/[!?:,'"'"']//g;s/ $//;s/[\(\)\/]/_/g;s/ /_/g;s/^_\{1,\}//g;s/_\{2,\}/_/g;' \
             | tr -cd '[:print:]' \
         `"
         url="`xpather "//item[./guid/text()='$guid']/enclosure/@url"`"
