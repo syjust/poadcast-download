@@ -1,8 +1,9 @@
 #!/bin/bash
 # this script :
-# * read rss.txt file
-# * build simple txt file with  all or filtered podcasts title/media_url/img_url
-# * TODO: implemnt copy files with title into specific folder and store md5sum to avoid future replacements
+# * dowload rss.xml file
+# * read rss.xml file
+# * build simple urls.txt file with  all or filtered podcasts title/media_url/img_url (# separated)
+# * TODO: implemnt copy files with title into specific folder and store md5sum to avoid future replacements or force rename files
 export LANG=C # avoid Invalid collation character / Illegal byte sequence
 
 FILTER=""
@@ -100,6 +101,9 @@ export -f xpather
 # {{{ function usage
 #
 usage() {
+    echo
+    echo "$0 : a rss.xml {downloader / reader / syncer} for podcasts media files (title, audio, image)"
+    echo
     echo "USAGE : ./sync-podcast.sh [OPTIONS]"
     echo
     echo "WHERE OPTIONS are :"
@@ -115,7 +119,7 @@ export -f usage
 cka() {
     local option="$1"
     local arg="$2"
-    [ -z "$2" ] && quit "'$option' optoin need an argument"
+    [ -z "$2" ] && quit "'$option' option need an argument"
     [[ "$2" =~ ^- ]] && quit "'$option' argument must not start with hyphen '-'"
     return 0
 }
@@ -158,7 +162,7 @@ source "$CONFIG_FILE"
 while [[ ! -z "$1" ]] ; do
     case $1 in
         -o|--output-dir) shift ;; # define output directory (default is 'podcasts' in current folder)
-        -h|--help) usage ; exit ;; # print this message and exist without error
+        -h|--help) usage ; exit ;; # print this message and exit without error
         -f|--filter) # this option allow to build only podcatst with title matching given {filter} regex (else, all rss urls will be build)
             cka $1 $2
             if [[ -z "$FILTER" ]] ; then
@@ -188,24 +192,24 @@ export RSS_FILE="$OUTPUT_DIR/$RSS_FILE_NAME"
 export URLS_FILE="$OUTPUT_DIR/$URLS_FILE_NAME"
 
 #{{{ RELOAD rss.xml
-if [ $RELOAD -eq 1 ] ; then
+if [ $RELOAD -eq 1 -a -e $RSS_FILE ] ; then
     if (yes_no "removing '$RSS_FILE'") ; then
-        [ -e $RSS_FILE ] && rm -v $RSS_FILE
+         rm -v $RSS_FILE
     fi
 fi
 # }}}
 
 #{{{ REBUILD urls.txt
-if [ $REBUILD -eq 1 ] ; then
+if [ $REBUILD -eq 1 -a -e $URLS_FILE ] ; then
     if (yes_no "removing '$URLS_FILE'") ; then
-        [ -e $URLS_FILE ] && rm -v $URLS_FILE
+         rm -v $URLS_FILE
     fi
 fi
 # }}}
 
 # {{{ DOWNLOAD rss.xml (if necessary)
 if [ ! -e $RSS_FILE -a ! -e $URLS_FILE ] ; then
-    [ -z "$RSS_URL" ] && quit "'$RSS_FILE' & '$URLS_FILE' not found : you must provide --url to download it"
+    [ -z "$RSS_URL" ] && quit "'$RSS_FILE' & '$URLS_FILE' not found : you must provide --url or set RSS_URL into your config file to download it"
     grep -q RSS_URL $CONFIG_FILE 2>&1 >/dev/null || echo "RSS_URL='$RSS_URL'" >> $CONFIG_FILE
     wget -O $RSS_FILE $RSS_URL
 fi
