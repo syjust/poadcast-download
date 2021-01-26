@@ -1,1 +1,2 @@
 RSS_URL='https://rss.acast.com/mythes-et-legendes'
+ITEM_TITLE_PATH="acast:episodeUrl/text()"
